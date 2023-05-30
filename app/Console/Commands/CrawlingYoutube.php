@@ -21,7 +21,7 @@ class CrawlingYoutube extends Command
     {
         $response = Http::get("https://www.googleapis.com/youtube/v3/search", [
             "part" => "snippet",
-            "key" => "AIzaSyDLPtm7PG-GPeuOQmV8ogGYrPDcZBq7AO4",
+            "key" => env("KEY_YOUTUBE"),
             "q" => "Politik",
             "maxResults" => 50
         ]);
@@ -45,32 +45,17 @@ class CrawlingYoutube extends Command
         foreach ($response->json()['items'] as $key => $item) {
             $index++;
 
-            $activeWorksheet->setCellValue("A$index", "publishedAt");
-            $activeWorksheet->setCellValue("B$index", "channelId");
-            $activeWorksheet->setCellValue("C$index", "title");
-            $activeWorksheet->setCellValue("D$index", "description");
-            $activeWorksheet->setCellValue("E$index", "channelTitle");
-
-
-            if (is_file(public_path(self::FILE))) {
-                $this->newRowData($response->json()['items']);
-                return;
-            }
-
-            foreach ($response->json()['items'] as $key => $item) {
-                $index++;
-
-                $activeWorksheet->setCellValue("A$index", $item['snippet']['publishedAt']);
-                $activeWorksheet->setCellValue("B$index", $item['snippet']['channelId']);
-                $activeWorksheet->setCellValue("C$index", $item['snippet']['title']);
-                $activeWorksheet->setCellValue("D$index", $item['snippet']['description']);
-                $activeWorksheet->setCellValue("E$index", $item['snippet']['channelTitle']);
-            }
-
-            $writer = new Xlsx($spreadsheet);
-            $writer->save(public_path(self::FILE));
-            return;
+            $activeWorksheet->setCellValue("A$index", $item['snippet']['publishedAt']);
+            $activeWorksheet->setCellValue("B$index", $item['snippet']['channelId']);
+            $activeWorksheet->setCellValue("C$index", $item['snippet']['title']);
+            $activeWorksheet->setCellValue("D$index", $item['snippet']['description']);
+            $activeWorksheet->setCellValue("E$index", $item['snippet']['channelTitle']);
         }
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save(public_path(self::FILE));
+        return;
+
     }
 
     protected function newRowData($data)
